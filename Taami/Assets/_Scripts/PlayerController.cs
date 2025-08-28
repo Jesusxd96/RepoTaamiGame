@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
@@ -51,4 +52,8 @@ public class PlayerController : MonoBehaviour
     {
         rb.AddForce(new Vector3(0, jumpForce, 0), ForceMode.VelocityChange);//Ignora gravedad y Drag
     }*/
+    public void Jump(InputAction.CallbackContext context)
+    {
+
+    }
 }
