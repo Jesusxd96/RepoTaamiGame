@@ -15,9 +15,13 @@ public class PlayerController : MonoBehaviour
     private Vector2 _input;//Input del jugador.
     private Vector3 _direction;
     [SerializeField]private float speed = 6f; //La velocidad a la que se mueve el personaje
-    [SerializeField]private float jumpForce = 10f;
+    [SerializeField]private float jumpPower = 10f;
     [SerializeField]private float turnSmoothTime = 0.05f; //La velocidad a la que rota el mono, para que no sea tan brusco.
     private float _currentVelocity;
+
+    private float _gravity = -9.81f;
+    [SerializeField]private float gravityMultiplier = 3.0f;
+    private float _velocity;
 
     private void Awake()
     {
@@ -25,44 +29,45 @@ public class PlayerController : MonoBehaviour
     }
     private void Update()
     {
+        ApplyGravity();
+        ApplyRotation();
+        ApplyMovement();
+    }
+    private void ApplyRotation()//Esto rota al personaje hacia la direccion del Move 
+    {
         if (_input.sqrMagnitude == 0) return;
         var targetAngle = Mathf.Atan2(_direction.x, _direction.z) * Mathf.Rad2Deg;
         var angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref _currentVelocity, turnSmoothTime);
         transform.rotation = Quaternion.Euler(0, angle, 0);
-
-        controller.Move(_direction*speed * Time.deltaTime);
     }
-    public void Move(InputAction.CallbackContext context)
+    public void ApplyMovement() //Aqui se aplica los inputs para mover al personaje
+    {
+        controller.Move(_direction * speed * Time.deltaTime);
+    }
+    public void ApplyGravity()
+    {
+        if (IsGrounded() && _velocity <0.0f)
+        {
+            _velocity = -1.0f;
+        }
+        else
+        {
+            _velocity += _gravity * gravityMultiplier * Time.deltaTime;
+        }
+
+        _direction.y = _velocity; //Se aplicara velocity para hacer que el jugador vaya hacia abajo.
+    }
+    public void Move(InputAction.CallbackContext context)//Logica para mover al personaje.
     {
         _input = context.ReadValue<Vector2>();
         _direction = new Vector3(_input.x, 0.0f, _input.y);//Se usan X y Y porque es un _input de 2 Variables.
     }
     public void Jump(InputAction.CallbackContext context)
     {
+        if (context.started) return;
+        if (!IsGrounded()) return;
 
+        _velocity += jumpPower;
     }
-    public void OldMovement()
-    {
-        /*//We get the inputs here
-        float horizontal = Input.GetAxisRaw("Horizontal");
-        float vertical = Input.GetAxisRaw("Vertical");
-        Vector3 direction = new Vector3(horizontal, 0f, vertical).normalized;
-        
-        if(direction.magnitude >= 0.1f) //Here is for the rotation.
-        {
-            float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg+ cam.eulerAngles.y;
-            float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref turnSmoothVelocity, turnSmoothTime);
-            transform.rotation = Quaternion.Euler(0f, angle, 0f);
-            //This is to move while taking into consideration the camera.
-            Vector3 moveDir = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
-            controller.Move(moveDir.normalized * speed * Time.deltaTime);
-        }
-        //Logica de Salto simple
-        if ((Input.GetButton("Jump"))&&(isGrounded==true))//Se usa la variable interna en lo que se ve como hacerle para la de Controller.
-        {
-            rb.AddForce(transform.up * jumpForce);
-            //rb.AddForce(new Vector3(0, jumpForce, 0), ForceMode.VelocityChange);
-            //isGrounded = false;
-        }*/
-    }
+    private bool IsGrounded() => controller.isGrounded;
 }
