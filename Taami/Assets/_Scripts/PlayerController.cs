@@ -36,6 +36,7 @@ public class PlayerController : MonoBehaviour
     private void ApplyRotation()//Esto rota al personaje hacia la direccion del Move 
     {
         if (_input.sqrMagnitude == 0) return;
+
         var targetAngle = Mathf.Atan2(_direction.x, _direction.z) * Mathf.Rad2Deg;
         var angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref _currentVelocity, turnSmoothTime);
         transform.rotation = Quaternion.Euler(0, angle, 0);
