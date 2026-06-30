@@ -11,21 +11,29 @@ public class PlayerController : MonoBehaviour
     public Rigidbody rb;//El rigidbody del player.
 
     /*Variables de movimiento y del jugador*/
-    private CharacterController controller;
+    #region Movimiento
+    private CharacterController _characterController;
     private Vector2 _input;//Input del jugador.
     private Vector3 _direction;
     [SerializeField]private float speed = 6f; //La velocidad a la que se mueve el personaje
+    #endregion
+
+    #region Saltos
     [SerializeField]private float jumpPower = 10f;
+    private int _numberOfJumps=0;
+    [SerializeField] private int maxNumberOfJumps = 2;//Numero maximo de saltos, apenas veremos si hay o no doble salto
+    #endregion 
+
     [SerializeField]private float turnSmoothTime = 0.05f; //La velocidad a la que rota el mono, para que no sea tan brusco.
     private float _currentVelocity;
 
-    private float _gravity = -9.81f;
+    private float _gravity = -9.81f; //Gravedad
     [SerializeField]private float gravityMultiplier = 3.0f;
     private float _velocity;
 
     private void Awake()
     {
-        controller = GetComponent<CharacterController>();
+        _characterController = GetComponent<CharacterController>();
     }
     private void Update()
     {
@@ -43,11 +51,11 @@ public class PlayerController : MonoBehaviour
     }
     public void ApplyMovement() //Aqui se aplica los inputs para mover al personaje
     {
-        controller.Move(_direction * speed * Time.deltaTime);
+        _characterController.Move(_direction * speed * Time.deltaTime);
     }
     public void ApplyGravity()
     {
-        if (IsGrounded() && _velocity <0.0f)
+        if (IsGrounded() && _velocity <0.0f)//Si el personaje esta en el piso y la velocidad es menor a 0
         {
             _velocity = -1.0f;
         }
@@ -65,10 +73,20 @@ public class PlayerController : MonoBehaviour
     }
     public void Jump(InputAction.CallbackContext context)
     {
-        if (context.started) return;
-        if (!IsGrounded()) return;
+        if (!context.started) return;
+        //if (!IsGrounded()) return; //Solo un salto
+        if (!IsGrounded() && _numberOfJumps >= maxNumberOfJumps) return;//Doble salto
+        if (_numberOfJumps == 0) StartCoroutine(WaitForLanding());
 
-        _velocity += jumpPower;
+        _numberOfJumps++;//Se aumenta el contador de saltos.
+        //_velocity = jumpPower; // Altura y fuerza constante a la hora de saltar.
+        _velocity = jumpPower / _numberOfJumps; //Con cada salto disminuye la altura/fuerza de este.
     }
-    private bool IsGrounded() => controller.isGrounded;
+
+    private IEnumerator WaitForLanding() {//Corrutina
+        yield return new WaitUntil(() => !IsGrounded());//Se espera a que el personaje no este grounded, osease ha saltado.
+        yield return new WaitUntil(IsGrounded);
+        _numberOfJumps = 0;
+    }
+    private bool IsGrounded() => _characterController.isGrounded;//Regresa una boolean para simplemente llamar IsGrounded en vez de toda la linea
 }
