@@ -13,19 +13,19 @@ public class PlayerController : MonoBehaviour
     /*Variables de movimiento y del jugador*/
     #region Movimiento
     private CharacterController _characterController;
-    private Vector2 _input;//Input del jugador.
+    private Vector2 _input;//Input del jugador. 
     private Vector3 _direction;
     [SerializeField]private float speed = 6f; //La velocidad a la que se mueve el personaje
     #endregion
-
     #region Saltos
     [SerializeField]private float jumpPower = 10f;
     private int _numberOfJumps=0;
     [SerializeField] private int maxNumberOfJumps = 2;//Numero maximo de saltos, apenas veremos si hay o no doble salto
-    #endregion 
-
-    [SerializeField]private float turnSmoothTime = 0.05f; //La velocidad a la que rota el mono, para que no sea tan brusco.
-    private float _currentVelocity;
+    #endregion
+    #region Rotacion
+    [SerializeField]private float rotationSpeed = 500.0f; //La velocidad a la que rota el mono, para que no sea tan brusco.
+    private Camera _mainCamera;
+    #endregion
 
     private float _gravity = -9.81f; //Gravedad
     [SerializeField]private float gravityMultiplier = 3.0f;
@@ -34,20 +34,22 @@ public class PlayerController : MonoBehaviour
     private void Awake()
     {
         _characterController = GetComponent<CharacterController>();
+        _mainCamera = Camera.main;
     }
     private void Update()
     {
-        ApplyGravity();
         ApplyRotation();
+        ApplyGravity();
         ApplyMovement();
     }
     private void ApplyRotation()//Esto rota al personaje hacia la direccion del Move 
     {
         if (_input.sqrMagnitude == 0) return;
 
-        var targetAngle = Mathf.Atan2(_direction.x, _direction.z) * Mathf.Rad2Deg;
-        var angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref _currentVelocity, turnSmoothTime);
-        transform.rotation = Quaternion.Euler(0, angle, 0);
+        _direction = Quaternion.Euler(0.0f, _mainCamera.transform.eulerAngles.y, 0.0f) * new Vector3(_input.x, 0.0f, _input.y);
+        var targetRotation = Quaternion.LookRotation(_direction, Vector3.up);
+
+        transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
     }
     public void ApplyMovement() //Aqui se aplica los inputs para mover al personaje
     {
