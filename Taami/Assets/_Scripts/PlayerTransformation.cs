@@ -39,6 +39,7 @@ public class PlayerTransformation : MonoBehaviour
             taamiForms[0].SetActive(false);
             taamiForms[1].SetActive(true);
             currentForm = taamiForms[1];
+            CopyCharacterValues(taamiForms[1].GetComponent<FormProperties>(), this.gameObject.GetComponent<PlayerController>());
             CopyCharacterController(taamiForms[1].GetComponent<CharacterController>(),this.gameObject.GetComponent<CharacterController>());
         }
         else if(currentForm== taamiForms[1])
@@ -47,18 +48,28 @@ public class PlayerTransformation : MonoBehaviour
             taamiForms[0].SetActive(true);
             currentForm = taamiForms[0];
             CopyCharacterController(taamiForms[0].GetComponent<CharacterController>(), this.gameObject.GetComponent<CharacterController>());
+            CopyCharacterValues(taamiForms[0].GetComponent<FormProperties>(), this.gameObject.GetComponent<PlayerController>());
         }
     }
-    void CopyCharacterController(CharacterController source, CharacterController destination)//Copia los 
+    void CopyCharacterController(CharacterController fuente, CharacterController destino)//Copia los character controller de las otras formas
     {
-        destination.radius = source.radius;
-        destination.height = source.height;
-        destination.center = source.center;
-        destination.slopeLimit = source.slopeLimit;
-        destination.stepOffset = source.stepOffset;
-        destination.skinWidth = source.skinWidth;
-        destination.minMoveDistance = source.minMoveDistance;
-        destination.detectCollisions = source.detectCollisions;
-        destination.enableOverlapRecovery = source.enableOverlapRecovery;
+        destino.radius = fuente.radius;
+        destino.height = fuente.height;
+        destino.center = fuente.center;
+        destino.slopeLimit = fuente.slopeLimit;
+        destino.stepOffset = fuente.stepOffset;
+        destino.skinWidth = fuente.skinWidth;
+        destino.minMoveDistance = fuente.minMoveDistance;
+        destino.detectCollisions = fuente.detectCollisions;
+        destino.enableOverlapRecovery = fuente.enableOverlapRecovery;
+    }
+    void CopyCharacterValues(FormProperties valores,PlayerController jugador)//Copia las variables de velocidad, salto, etc del modelo a desplegar.
+    {
+        jugador.SetSpeed(valores.speed);
+        jugador.SetRotationSpeed(valores.rotationSpeed);
+        jugador.SetJumpPower(valores.jumpPower);
+        jugador.SetMaxNumberOfJumps(valores.maxNumberOfJumps);
+        jugador.SetRotationSpeed(valores.rotationSpeed);
+        jugador.SetGravityMultiplier(valores.gravityMultiplier);
     }
 }

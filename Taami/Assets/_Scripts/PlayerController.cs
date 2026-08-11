@@ -26,11 +26,53 @@ public class PlayerController : MonoBehaviour
     [SerializeField]private float rotationSpeed = 500.0f; //La velocidad a la que rota el mono, para que no sea tan brusco.
     private Camera _mainCamera;
     #endregion
-
+    #region Gravedad
     private float _gravity = -9.81f; //Gravedad
     [SerializeField]private float gravityMultiplier = 3.0f;
     private float _velocity;
-
+    #endregion
+    #region Setters y Getters
+    public float Speed
+    {
+        get => speed;
+    }
+    public void SetSpeed(float value)
+    {
+        speed = value;
+    }
+    public float JumpPower
+    {
+        get => jumpPower;
+    }
+    public void SetJumpPower(float value)
+    {
+        jumpPower = value;
+    }
+    public int NumOfJumps
+    {
+        get => maxNumberOfJumps;
+    }
+    public void SetMaxNumberOfJumps(int value)
+    {
+        maxNumberOfJumps = value;
+    }
+    public float RotationSpeed
+    {
+        get => rotationSpeed;
+    }
+    public void SetRotationSpeed(float value)
+    {
+        rotationSpeed = value;
+    }
+    public float GravityMultiple
+    {
+        get => gravityMultiplier;
+    }
+    public void SetGravityMultiplier(float value)
+    {
+        gravityMultiplier = value;
+    }
+    #endregion
     private void Awake()
     {
         _characterController = GetComponent<CharacterController>();
